@@ -2,3 +2,4 @@
 bin/
 internal/.cover
 coverage.html
+swarm
