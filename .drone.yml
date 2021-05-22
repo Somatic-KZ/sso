@@ -1,0 +1,220 @@
+---
+kind: pipeline
+type: docker
+name: production
+
+trigger:
+  event:
+    - tag
+
+steps:
+- name: Prod - copy docker-compose on hosts
+  pull: always
+  image: appleboy/drone-scp
+  settings:
+    host:
+      from_secret: swarm_host
+    user: drone
+    key:
+      from_secret: ssh_key
+    port: 22
+    target: /new_projects/${DRONE_REPO_NAME}
+    source:
+      - swarm/production.yml
+
+- name: Prod - docker add release tag
+  pull: always
+  image: plugins/docker
+  settings:
+    dockerfile: Dockerfile
+    registry: registry.technodom.kz
+    repo: registry.technodom.kz/${DRONE_REPO_NAME}
+    insecure: true
+    username:
+      from_secret: registry_username
+    password:
+      from_secret: registry_password
+    build_args:
+      - DRONE=${DRONE}
+      - DRONE_TAG=${DRONE_TAG}
+      - DRONE_COMMIT=${DRONE_COMMIT}
+      - DRONE_BRANCH=${DRONE_BRANCH}
+    tags:
+      - latest
+      - ${DRONE_TAG}
+
+- name: Prod - publishing images on hosts
+  pull: always
+  image: appleboy/drone-ssh
+  environment:
+    DOCKER_USER:
+      from_secret: registry_username
+    DOCKER_PASS:
+      from_secret: registry_password
+  settings:
+    host:
+      from_secret: swarm_host
+    user: drone
+    key:
+      from_secret: ssh_key
+    port: 22
+    envs: [ DOCKER_USER, DOCKER_PASS ]
+    script:
+      - docker login -u $DOCKER_USER -p $DOCKER_PASS registry.technodom.kz
+      - docker pull registry.technodom.kz/${DRONE_REPO_NAME}:latest
+  depends_on:
+    - Prod - docker add release tag
+
+# Запуск скрипта по обновлению приложения из docker-compose.yml
+- name: Prod - deploy to swarm
+  pull: always
+  image: appleboy/drone-ssh
+  settings:
+    host:
+      from_secret: single_host
+    user: drone
+    key:
+      from_secret: ssh_key
+    port: 22
+    script:
+      - docker stack deploy --with-registry-auth -c /new_projects/${DRONE_REPO_NAME}/swarm/production.yml ${DRONE_REPO_NAME}
+  depends_on:
+    - Prod - docker add release tag
+    - Prod - publishing images on hosts
+
+# Удаление остановленных не используемых контейнеров
+- name: Prod - remove exited containers
+  pull: always
+  image: appleboy/drone-ssh
+  settings:
+    host:
+      from_secret: swarm_host
+    user: drone
+    key:
+      from_secret: ssh_key
+    port: 22
+    script:
+      - /new_projects/rm_old_containers.sh
+  depends_on:
+    - Prod - docker add release tag
+    - Prod - publishing images on hosts
+    - Prod - deploy to swarm
+
+# Отправка сообщения в telegram
+- name: Prod - send telegram notification
+  image: appleboy/drone-telegram
+  settings:
+    token: 1292689804:AAG7t1Sy5PSEA6GafLzSzB5hauSzXjhueaA
+    to: -1001207996096
+    message: "{{#success build.status}} ✅  Build and deploy [#{{build.number}}]({{ build.link }}) of `{{repo.name}}` succeeded.\n\n
+      📝 Commit by {{commit.author}} on `{{commit.branch}}`:\n``` {{commit.message}} ```\n
+      {{else}} ❌  Build and deploy [#{{build.number}}]({{ build.link }}) of `{{repo.name}}` failed.\n\n
+      📝 Commit by {{commit.author}} on `{{commit.branch}}`:\n``` {{commit.message}} ```\n {{/success}}\n"
+  when:
+    status: [ success, failure ]
+  depends_on:
+    - Prod - docker add release tag
+    - Prod - publishing images on hosts
+    - Prod - deploy to swarm
+    - Prod - remove exited containers
+
+---
+kind: pipeline
+type: docker
+name: staging
+
+trigger:
+  branch:
+    - stage
+  event:
+    - push
+
+steps:
+- name: Stage - copy docker-compose on hosts
+  pull: always
+  image: appleboy/drone-scp
+  settings:
+    host:
+      from_secret: stage_hosts
+    user: drone
+    key:
+      from_secret: ssh_key
+    port: 22
+    target: /new_projects/${DRONE_REPO_NAME}
+    source:
+      - swarm/staging.yml
+
+- name: Stage - docker add release tag
+  pull: always
+  image: plugins/docker
+  settings:
+    dockerfile: Dockerfile
+    registry: registry.technodom.kz
+    repo: registry.technodom.kz/${DRONE_REPO_NAME}
+    insecure: true
+    username:
+      from_secret: registry_username
+    password:
+      from_secret: registry_password
+    build_args:
+      - DRONE=${DRONE}
+      - DRONE_TAG=${DRONE_TAG}
+      - DRONE_COMMIT=${DRONE_COMMIT}
+      - DRONE_BRANCH=${DRONE_BRANCH}
+    tags:
+      - stage
+
+- name: Stage - publishing images on hosts
+  pull: always
+  image: appleboy/drone-ssh
+  environment:
+    DOCKER_USER:
+      from_secret: registry_username
+    DOCKER_PASS:
+      from_secret: registry_password
+  settings:
+    host:
+      from_secret: stage_hosts
+    user: drone
+    key:
+      from_secret: ssh_key
+    port: 22
+    envs: [ DOCKER_USER, DOCKER_PASS ]
+    script:
+      - docker login -u $DOCKER_USER -p $DOCKER_PASS registry.technodom.kz
+      - docker pull registry.technodom.kz/${DRONE_REPO_NAME}:stage
+  depends_on:
+    - Stage - docker add release tag
+
+- name: Stage - deploy to swarm
+  pull: always
+  image: appleboy/drone-ssh
+  settings:
+    host:
+      from_secret: single_stage_host
+    user: drone
+    key:
+      from_secret: ssh_key
+    port: 22
+    script:
+      - docker stack deploy --with-registry-auth -c /new_projects/${DRONE_REPO_NAME}/swarm/staging.yml ${DRONE_REPO_NAME}
+  depends_on:
+    - Stage - docker add release tag
+    - Stage - publishing images on hosts
+
+- name: Stage - remove exited containers
+  pull: always
+  image: appleboy/drone-ssh
+  settings:
+    host:
+      from_secret: stage_hosts
+    user: drone
+    key:
+      from_secret: ssh_key
+    port: 22
+    script:
+      - /new_projects/rm_old_containers.sh
+  depends_on:
+    - Stage - docker add release tag
+    - Stage - publishing images on hosts
+    - Stage - deploy to swarm

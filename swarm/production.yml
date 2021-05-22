@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  sso:
+    image: registry.technodom.kz/sso:latest
+    environment:
+      - DATASTORE_URL=mongodb://sso:NoD7vaipee5IpheiTeeFa4Wai9waitha@mongo-c-01-prod-ecom.technodom.kz:27005,mongo-c-02-prod-ecom.technodom.kz:27005,mongo-c-03-prod-ecom.technodom.kz:27005/sso?authMechanism=SCRAM-SHA-1
+      - NOTIFY_URL=http://vm-sms3.technodom.kz/api/technodom
+      - NOTIFY_PASS=DJ421JLKRb9M
+      - JWT_KEY=f63338666de87438f756d159fb6c1333
+      - TOKEN_TTL=172800
+      - REFRESH_TOKEN_TTL=60
+      - WITH_PROM=1
+      - RECOVERY_SPAM_PENALTY=55
+      - VERIFY_SPAM_PENALTY=55
+      - DEBUG=1
+      - GRPC_LISTEN=:4007
+      - FEED_GRPC_ADDR=halbredis.technodom.kz:4011
+      - PROMO_GRPC_ADDR=halbredis.technodom.kz:4008
+      - PMS_GRPC_ADDR=halbredis.technodom.kz:4013
+      - JAM_GRPC_ADDR=halbredis.technodom.kz:4018
+      - CD_GRPC_ADDR=halbredis.technodom.kz:4006
+    networks:
+      - traefik-external
+    ports:
+      - "5002:9090"
+      - "4007:4007"
+    deploy:
+      replicas: 3
+      placement:
+        constraints:
+          - node.labels.project == micro01
+          - node.labels.traefik == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-external"
+        - "traefik.http.services.sso.loadbalancer.server.port=8080"
+        - "traefik.http.routers.sso.entrypoints=http"
+        - "traefik.http.routers.sso.rule=Host(`sso.technodom.kz`)"
+
+networks:
+  traefik-external:
+    external: true

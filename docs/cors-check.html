@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>C.O.R.S. tester</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+</head>
+<body>
+<section class="section">
+    <div class="container">
+        <h1 class="title">
+            Тестирование C.O.R.S.
+        </h1>
+        <p class="subtitle">
+            Узнать больше о <a href="https://developer.mozilla.org/ru/docs/Web/HTTP/CORS">C.O.R.S.</a>
+        </p>
+        <hr>
+
+        <div class="columns">
+            <div class="column is-2">
+                <div class="control">
+                    <div class="select">
+                        <select id="js__method">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT" selected>PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="field">
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Введите URL" value="http://sso.lcl/api/v1/auth/signup" id="js__url">
+                    </div>
+
+                </div>
+            </div>
+            <div class="column is-2">
+                <a class="button is-info" id="js__try">Проверить</a>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+
+<script>
+    // Пример отправки POST запроса:
+    async function postData(url = '', method, data = {}) {
+        // Default options are marked with *
+        const response = await fetch(url, {
+            method: method, // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrerPolicy: 'no-referrer', // no-referrer, *client
+        });
+        return await response.json(); // parses JSON response into native JavaScript objects
+    }
+
+    document.getElementById("js__try").addEventListener("click", (e) => {
+        e.preventDefault();
+
+        let url = document.getElementById("js__url").value;
+        let method = document.getElementById("js__method").value;
+
+        postData(url, method, {}).then((data) => {
+            console.log(data); // JSON data parsed by `response.json()` call
+        });
+    });
+
+</script>
+</html>
+

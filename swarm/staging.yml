@@ -1,0 +1,43 @@
+version: '3'
+services:
+  sso:
+    image: registry.technodom.kz/sso:stage
+    environment:
+      #- DATASTORE_URL=mongodb://sso:auCh4laNgei9da4yebieGah4laigheiju@mongo-01-dev-ecom.technodom.kz:27005,mongo-02-dev-ecom.technodom.kz:27005,mongo-03-dev-ecom.technodom.kz:27005/sso?authMechanism=SCRAM-SHA-1
+      #- DATASTORE_URL=mongodb://sso:SOh3TbYhx8ypJPxmt1oOfL@backend-stage-magento.technodom.kz:27018/sso?authMechanism=SCRAM-SHA-1
+      - DATASTORE_URL=mongodb://sso:aec9neGohquaqu8ieviekaedoilo8hae@mongo-c-01-stage-ecom.technodom.kz:27005,mongo-c-02-stage-ecom.technodom.kz:27005,mongo-c-03-stage-ecom.technodom.kz:27005/sso?authMechanism=SCRAM-SHA-1
+      - JWT_KEY=technodom-secret
+      - DEBUG=true
+      - APP_TESTING=true
+      - WITH_PROM=0
+      - RECOVERY_SPAM_PENALTY=55
+      - VERIFY_SPAM_PENALTY=55
+      - GRPC_LISTEN=:6007
+      - BASE_PATH=/sso
+      - LISTEN=:8083
+      - FEED_GRPC_ADDR=halbredis.technodom.kz:6011
+      - PROMO_GRPC_ADDR=halbredis.technodom.kz:6008
+      - PMS_GRPC_ADDR=halbredis.technodom.kz:6013
+      - JAM_GRPC_ADDR=halbredis.technodom.kz:6018
+      - CD_GRPC_ADDR=halbredis.technodom.kz:6006
+    networks:
+      - stage-external
+    ports:
+      - "6007:6007"
+    deploy:
+      replicas: 3
+      placement:
+        constraints:
+          - node.labels.stage == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=stage-external"
+        - "traefik.http.services.sso.loadbalancer.server.port=8083"
+        - "traefik.http.routers.sso.entrypoints=http"
+        - "traefik.http.routers.sso.rule=Host(`tapi.technodom.kz`)"
+        - "traefik.http.routers.sso.rule=PathPrefix(`/sso`)"
+        - "traefik.http.middlewares.sso_stripprefix.stripprefix.prefixes=/sso"
+        - "traefik.http.routers.sso.middlewares=sso_stripprefix"
+networks:
+  stage-external:
+    external: true

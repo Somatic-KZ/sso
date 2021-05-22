@@ -1,0 +1,7 @@
+/.idea/
+/docs/
+/bin/
+/src/.cover/
+
+coverage.html
+docker-compose.yml
