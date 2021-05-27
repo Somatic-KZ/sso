@@ -18,8 +18,8 @@ type APIServer struct {
 	DSURL  string `short:"u" long:"ds-url" env:"DATASTORE_URL" description:"DataStore URL (format: mongodb://localhost:27017)" required:"false" default:"mongodb+srv://root:somatic123@clusterdiploma.yytdj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"`
 
 	ListenAddr string `short:"l" long:"listen" env:"LISTEN" description:"Listen Address (format: :8080|127.0.0.1:8080)" required:"false" default:":8080"`
-	BasePath   string `long:"base-path" env:"BASE_PATH" description:"base path of the host" required:"false" default:"/sso"`
-	FilesDir   string `long:"files-directory" env:"FILES_DIR" description:"Directory where all static files are located" required:"false" default:"/usr/share/sso"`
+	BasePath   string `long:"base-path" env:"BASE_PATH" description:"base path of the host" required:"false" default:""`
+	FilesDir   string `long:"files-directory" env:"FILES_DIR" description:"Directory where all static files are located" required:"false" default:"./api"`
 	CertFile   string `short:"c" long:"cert" env:"CERT_FILE" description:"Location of the SSL/TLS cert file" required:"false" default:""`
 	KeyFile    string `short:"k" long:"key" env:"KEY_FILE" description:"Location of the SSL/TLS key file" required:"false" default:""`
 
