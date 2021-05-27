@@ -1,0 +1,15 @@
+syntax="proto3";
+
+package sso.pkg.go;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/JetBrainer/sso-client/protobuf;protobuf";
+
+message UserTokenRequest {
+  string id = 1;
+}
+
+service SSO{
+  rpc UserToken(UserTokenRequest) returns (google.protobuf.Empty);
+}
