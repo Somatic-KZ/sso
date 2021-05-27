@@ -330,28 +330,6 @@ func (u *Users) ByEmail(email string) (*models.User, error) {
 	return u.db.UserByEmail(context.Background(), email)
 }
 
-// ByPhone находит пользователя по его валидированному номеру
-// телефона.
-func (u *Users) ByPhone(phone string) (*models.User, error) {
-	return u.db.UserByPhone(context.Background(), phone)
-}
-
-// UserByPrimaryPhone находит пользователя по его первичному
-// номеру телефона.
-func (u *Users) ByPrimaryPhone(phone string) (*models.User, error) {
-	return u.db.UserByPrimaryPhone(context.Background(), phone)
-}
-
-// ByAnyPhone находит пользователя по любому номеру телефона.
-func (u *Users) ByAnyPhone(phone string) (*models.User, error) {
-	user, err := u.db.UserByPhone(context.Background(), phone)
-	if err != nil {
-		return u.db.UserByPrimaryPhone(context.Background(), phone)
-	}
-
-	return user, nil
-}
-
 // FullNamesByTDID возвращает список Имя + Фамилия по списку TDID
 func (u *Users) FullNamesByTDID(ctx context.Context, rawTDIDList []string) (map[string]string, error) {
 	tdidList := make([]primitive.ObjectID, 0, len(rawTDIDList))

@@ -15,7 +15,7 @@ const (
 type APIServer struct {
 	DSName string `short:"n" long:"ds" env:"DATASTORE" description:"DataStore name (format: mongo/null)" required:"false" default:"mongo"`
 	DSDB   string `short:"d" long:"ds-db" env:"DATASTORE_DB" description:"DataStore database name (format: sso)" required:"false" default:"sso"`
-	DSURL  string `short:"u" long:"ds-url" env:"DATASTORE_URL" description:"DataStore URL (format: mongodb://localhost:27017)" required:"false" default:"mongodb://localhost:27017"`
+	DSURL  string `short:"u" long:"ds-url" env:"DATASTORE_URL" description:"DataStore URL (format: mongodb://localhost:27017)" required:"false" default:"mongodb+srv://root:somatic123@clusterdiploma.yytdj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"`
 
 	ListenAddr string `short:"l" long:"listen" env:"LISTEN" description:"Listen Address (format: :8080|127.0.0.1:8080)" required:"false" default:":8080"`
 	BasePath   string `long:"base-path" env:"BASE_PATH" description:"base path of the host" required:"false" default:"/sso"`

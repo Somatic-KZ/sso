@@ -5,16 +5,23 @@ import (
 	"log"
 	"net"
 
+	"github.com/JetBrainer/sso/internal/adapters/database/drivers"
 	"github.com/JetBrainer/sso/internal/domain/manager/auth"
 	"github.com/JetBrainer/sso/internal/ports/configs"
+	"github.com/JetBrainer/sso/internal/ports/grpc/resources"
+	"github.com/Somatic-KZ/sso-client/protobuf"
 	"google.golang.org/grpc"
 )
 
 type APIServer struct {
-	Address   string
-	IsTesting bool
+	Address     string
+	IsTesting   bool
+	authManager *auth.Manager
 
-	authManager  *auth.Manager
+	server    protobuf.SSOServer
+	verifyMan *resources.Verify
+
+	db drivers.DataStore
 
 	idleConnsClosed chan struct{}
 	masterCtx       context.Context
@@ -64,12 +71,12 @@ func (srv *APIServer) Run() error {
 // setupResources монтирует необходимые grpc-ресурсы для
 // обработки клиентских запросов
 func (srv *APIServer) setupResources() {
-
+	srv.verifyMan = resources.NewVerify(srv.db)
 }
 
 // registerServices регистрирует все необходимые сервисы для работы grpc сервера
 func (srv *APIServer) registerServices(grpcServer *grpc.Server) {
-
+	protobuf.RegisterSSOServer(grpcServer, srv.server)
 }
 
 // GracefulShutdown обрабатывает все оставшиеся соединения до остановки

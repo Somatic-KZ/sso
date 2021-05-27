@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"github.com/JetBrainer/sso/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -63,17 +62,6 @@ func (lm *LoginManager) SignInByTDID(tdid primitive.ObjectID, password string) (
 // SignInByEmail осуществляет логику входа пользователя в систему по его email.
 func (lm *LoginManager) SignInByEmail(email, password string) (string, error) {
 	user, err := lm.users.ByEmail(email)
-	if err != nil {
-		return "", err
-	}
-
-	return lm.SignInByTDID(user.ID, password)
-}
-
-// SignInByPhone осуществляет логику входа пользователя в систему по одному из
-// его номеров телефона.
-func (lm *LoginManager) SignInByPhone(phone, password string) (string, error) {
-	user, err := lm.users.ByPhone(utils.NormPhoneNum(phone))
 	if err != nil {
 		return "", err
 	}

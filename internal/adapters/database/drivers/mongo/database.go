@@ -17,8 +17,6 @@ const (
 	ensureIdxTimeout  = 20 * time.Second
 	retries           = 1
 	CollectionRoles   = "roles"
-	CollectionActions = "actions"
-	CollectionEvents  = "events"
 )
 
 type Mongo struct {
@@ -29,11 +27,9 @@ type Mongo struct {
 	DB      *mongo.Database
 	Context context.Context
 
-	rolesRepository   *RolesRepository
-	actionsRepository *ActionsRepository
-	eventsRepository  *EventsRepository
+	rolesRepository *RolesRepository
+	retries         int
 
-	retries           int
 	connectionTimeout time.Duration
 	ensureIdxTimeout  time.Duration
 }
@@ -71,7 +67,6 @@ func (m *Mongo) Connect() error {
 	}
 
 	m.DB = m.client.Database(m.dbname)
-
 
 	return nil
 }
@@ -116,7 +111,6 @@ func (m *Mongo) ensureUsersIndexes(ctx context.Context) error {
 	models := []mongo.IndexModel{
 		{Keys: bson.M{"email": 1}, Options: options.Index().SetUnique(true)},
 		{Keys: bson.M{"phone": 1}, Options: options.Index().SetUnique(true)},
-		{Keys: bson.M{"phones": 1}, Options: options.Index()},
 	}
 
 	var err error
@@ -162,42 +156,6 @@ func (m *Mongo) ensureRolesIndexes(ctx context.Context) error {
 
 	opts := options.CreateIndexes().SetMaxTime(m.ensureIdxTimeout)
 	_, err := col.Indexes().CreateMany(ctx, models, opts)
-
-	return err
-}
-
-func (m *Mongo) ensureActionsIndexes(ctx context.Context) error {
-	col := m.DB.Collection(CollectionActions)
-
-	models := []mongo.IndexModel{
-		{Keys: bson.M{"type": 1}, Options: options.Index().SetUnique(true)},
-	}
-
-	opts := options.CreateIndexes().SetMaxTime(m.ensureIdxTimeout)
-	_, err := col.Indexes().CreateMany(ctx, models, opts)
-
-	return err
-}
-
-func (m *Mongo) ensureEventsIndexes(ctx context.Context) error {
-	col := m.DB.Collection(CollectionEvents)
-
-	models := []mongo.IndexModel{
-		{Keys: bson.M{"actionType": 1}, Options: options.Index()},
-	}
-
-	exists, err := m.indexExistsByName(ctx, col, "verify_token_send_status")
-	if err != nil {
-		return err
-	}
-
-	if !exists {
-		idx := mongo.IndexModel{Keys: bson.M{"verify.token": 1, "verify.send": 1, "verify.status": 1}, Options: options.Index().SetName("verify_token_send_status")}
-		models = append(models, idx)
-	}
-
-	opts := options.CreateIndexes().SetMaxTime(m.ensureIdxTimeout)
-	_, err = col.Indexes().CreateMany(ctx, models, opts)
 
 	return err
 }

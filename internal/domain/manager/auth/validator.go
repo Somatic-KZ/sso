@@ -38,28 +38,6 @@ func (v ValidationRules) ValidateUniqueEmail(fl validator.FieldLevel) bool {
 	return existsUser == nil
 }
 
-// ValidateUniquePhone проверяет наличие уже существующего номера телефона у
-// другого пользователя.
-func (v ValidationRules) ValidateUniquePhone(fl validator.FieldLevel) bool {
-	phone := utils.NormPhoneNum(fl.Field().String())
-
-	// просматриваем первичный телефон
-	user, _ := v.users.ByPrimaryPhone(phone)
-
-	return user == nil
-}
-
-// ValidateUniquePhones проверяет наличие уже существующего и провалидированного номера телефона у
-// другого пользователя.
-func (v ValidationRules) ValidateUniquePhones(fl validator.FieldLevel) bool {
-	phone := utils.NormPhoneNum(fl.Field().String())
-
-	// просматриваем провалидированные телефоны
-	user, _ := v.users.ByPhone(phone)
-
-	return user == nil
-}
-
 // ValidateIsPhone проверка на правильность телефона
 func (v ValidationRules) ValidateIsPhone(fl validator.FieldLevel) bool {
 	return utils.NormPhoneNum(fl.Field().String()) != ""

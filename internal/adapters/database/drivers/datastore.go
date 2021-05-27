@@ -25,13 +25,6 @@ type DataStore interface {
 	UserDelete(ctx context.Context, login string) error
 	UserDeleteByTDID(ctx context.Context, uid primitive.ObjectID) error
 	UserUpdate(ctx context.Context, user *models.User) error
-	UserByPhone(ctx context.Context, phone string) (*models.User, error)
-	UserByPrimaryPhone(ctx context.Context, phone string) (*models.User, error)
-
-	// LastUserDeviceToken обновляет последний использованный девайс токен для отправки уведомлений
-	UserLastDeviceTokenUpdate(ctx context.Context, tdid string, device *models.Device) error
-	// LastDeviceToken получает последний обновленный токен девайса
-	LastDeviceToken(ctx context.Context, tdid string) (*models.Device, error)
 
 	// восстановление доступа
 	RestoreByPhoneNew(ctx context.Context, tdid primitive.ObjectID, phone, token string, expiredAt, nextAttemptAt time.Time) error
@@ -43,14 +36,7 @@ type DataStore interface {
 	RestoreFindExpiredAndUpdate(ctx context.Context, c chan<- models.User)
 	RestoreUpdate(ctx context.Context, user *models.User) error
 
-	// рутина верификации
-	VerifyPhone(ctx context.Context, tdid primitive.ObjectID, phone, token string, expiredAt, nextAttemptAt time.Time) error
-	VerifyPhoneIncrementGeneration(ctx context.Context, tdid primitive.ObjectID, phone, token string, expire, nextAttempt time.Duration) error
-	VerifyClean(ctx context.Context, tdid primitive.ObjectID, phone string) error
-	VerifyIncrementTries(ctx context.Context, tdid primitive.ObjectID) error
-	VerifyFindNew(ctx context.Context, c chan<- models.User)
-	VerifySendNotificationSuccessfully(ctx context.Context, tdid primitive.ObjectID) error
-	UpdateVerify(ctx context.Context, user *models.User) error
+	VerifyToken(ctx context.Context, token string) error
 
 	Roles() RolesRepository
 

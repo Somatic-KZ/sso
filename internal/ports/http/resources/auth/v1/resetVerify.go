@@ -24,7 +24,7 @@ type ResetVerifyRequest struct {
 // @Failure 422 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
 // @Router /auth/verify/reset [put]
-func (a AuthResource) ResetVerify(permissionsToCheck []string) http.HandlerFunc {
+func (a AuthResource) ResetVerify() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		req := new(ResetVerifyRequest)
@@ -35,11 +35,6 @@ func (a AuthResource) ResetVerify(permissionsToCheck []string) http.HandlerFunc 
 
 		if err := a.validate.Struct(req); err != nil {
 			_ = render.Render(w, r, resources.UnprocessableEntity(err))
-			return
-		}
-
-		if err := a.authManager.VerificationManager().ResetVerify(r.Context(), req.Phone); err != nil {
-			_ = render.Render(w, r, resources.Internal(err))
 			return
 		}
 	}

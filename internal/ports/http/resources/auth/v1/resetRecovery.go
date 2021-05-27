@@ -24,7 +24,7 @@ type ResetRecoveryRequest struct {
 // @Failure 422 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
 // @Router /auth/recovery/reset [put]
-func (a AuthResource) ResetRecovery(permissionsToCheck []string) http.HandlerFunc {
+func (a AuthResource) ResetRecovery() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		req := new(ResetRecoveryRequest)
@@ -35,11 +35,6 @@ func (a AuthResource) ResetRecovery(permissionsToCheck []string) http.HandlerFun
 
 		if err := a.validate.Struct(req); err != nil {
 			_ = render.Render(w, r, resources.UnprocessableEntity(err))
-			return
-		}
-
-		if err := a.authManager.RecoveryManager().RestoreReset(r.Context(), req.Phone); err != nil {
-			_ = render.Render(w, r, resources.Internal(err))
 			return
 		}
 	}

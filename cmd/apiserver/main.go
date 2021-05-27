@@ -15,6 +15,7 @@ import (
 	"github.com/JetBrainer/sso/internal/domain/validation"
 	"github.com/JetBrainer/sso/internal/ports/configs"
 	"github.com/JetBrainer/sso/internal/ports/grpc"
+	"github.com/JetBrainer/sso/internal/ports/grpc/resources"
 	"github.com/JetBrainer/sso/internal/ports/http"
 	"github.com/JetBrainer/sso/internal/ports/monitoring"
 	"github.com/JetBrainer/sso/pkg/logger"
@@ -23,7 +24,7 @@ import (
 )
 
 var (
-	version                    = "unknown"
+	version = "unknown"
 )
 
 func main() {
@@ -32,8 +33,6 @@ func main() {
 	opts := new(configs.APIServer)
 	opts.EnsureDefaults()
 	opts.Parse()
-
-
 
 	logger.Setup("DEBUG")
 
@@ -51,6 +50,7 @@ func main() {
 
 	metrics := setupMonitoring(appCtx, opts)
 	monitoringManager := monitoring2.New(ds, metrics)
+	verifyMan := resources.NewVerify(ds)
 
 	authManager := auth.New(
 		ds,
@@ -62,9 +62,6 @@ func main() {
 	verificationManager := authManager.VerificationManager()
 	if opts.VerifySpamPenalty > 0 {
 		verificationManager.WithSpamPenalty(time.Duration(opts.VerifySpamPenalty) * time.Second)
-	}
-	if opts.VerifyLongSpamPenalty > 0 {
-		verificationManager.WithLongSpamPenalty(time.Duration(opts.VerifyLongSpamPenalty) * time.Second)
 	}
 
 	recoveryManager := authManager.RecoveryManager()
@@ -101,6 +98,8 @@ func main() {
 		opts,
 		grpc.WithAuthManager(authManager),
 		grpc.WithVersion(version),
+		grpc.WithVerifyManager(verifyMan),
+		grpc.WithDatastore(ds),
 	)
 	servers.Go(func() error {
 		if err := grpcSrv.Run(); err != nil {
