@@ -2,9 +2,7 @@ package v1
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/JetBrainer/sso/internal/domain/models/api"
 	"github.com/JetBrainer/sso/internal/ports/http/resources"
@@ -37,22 +35,22 @@ func (a AuthResource) SignUP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := a.validate.Struct(sur); err != nil {
-		if a.metrics != nil && a.metrics.SignUpValidationErrors != nil {
-			(*a.metrics.SignUpValidationErrors).Add(1)
-		}
-
-		uniqueRules := []string{"unique_email", "unique_phones", "unique_phone"}
-		for _, rule := range uniqueRules {
-			if strings.Contains(err.Error(), rule) {
-				http.Error(w, errors.New("validation error").Error(), http.StatusBadRequest )
-				return
-			}
-		}
-
-		http.Error(w,"unprocessable value", http.StatusUnprocessableEntity)
-		return
-	}
+	//if err := a.validate.Struct(sur); err != nil {
+	//	if a.metrics != nil && a.metrics.SignUpValidationErrors != nil {
+	//		(*a.metrics.SignUpValidationErrors).Add(1)
+	//	}
+	//
+	////	uniqueRules := []string{"unique_email", "unique_phones", "unique_phone"}
+	////	for _, rule := range uniqueRules {
+	////		if strings.Contains(err.Error(), rule) {
+	////			http.Error(w, errors.New("validation error").Error(), http.StatusBadRequest )
+	////			return
+	////		}
+	////	}
+	//
+	//	http.Error(w,"unprocessable value", http.StatusUnprocessableEntity)
+	//	return
+	//}
 
 	normPhone := utils.NormPhoneNum(sur.Phone)
 	if normPhone == "" {

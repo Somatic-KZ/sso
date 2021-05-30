@@ -83,10 +83,8 @@ func (srv *APIServer) setupRouter() chi.Router {
 	// монтируем дополнительные ресурсы
 	r.Mount("/version", resources.VersionResource{Version: srv.version}.Routes())
 	r.Mount("/health", resources.NewHealth(srv.monitManager).Routes())
-	if srv.IsTesting {
-		r.Mount("/files", resources.FilesResource{FilesDir: srv.FilesDir}.Routes())
-		r.Mount("/swagger", v12.SwaggerResource{FilesPath: "/files", BasePath: srv.BasePath}.Routes())
-	}
+	r.Mount("/files", resources.FilesResource{FilesDir: srv.FilesDir}.Routes())
+	r.Mount("/swagger", v12.SwaggerResource{FilesPath: "/files", BasePath: srv.BasePath}.Routes())
 
 	return r
 }

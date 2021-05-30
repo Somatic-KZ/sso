@@ -23,9 +23,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var (
-	version = "unknown"
-)
+var version = "unknown"
 
 func main() {
 	fmt.Printf("sso %s\n", version)

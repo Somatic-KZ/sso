@@ -76,7 +76,7 @@ func (srv *APIServer) setupResources() {
 
 // registerServices регистрирует все необходимые сервисы для работы grpc сервера
 func (srv *APIServer) registerServices(grpcServer *grpc.Server) {
-	protobuf.RegisterSSOServer(grpcServer, srv.server)
+	protobuf.RegisterSSOServer(grpcServer, srv.verifyMan)
 }
 
 // GracefulShutdown обрабатывает все оставшиеся соединения до остановки

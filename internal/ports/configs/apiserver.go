@@ -17,15 +17,15 @@ type APIServer struct {
 	DSDB   string `short:"d" long:"ds-db" env:"DATASTORE_DB" description:"DataStore database name (format: sso)" required:"false" default:"sso"`
 	DSURL  string `short:"u" long:"ds-url" env:"DATASTORE_URL" description:"DataStore URL (format: mongodb://localhost:27017)" required:"false" default:"mongodb+srv://root:somatic123@clusterdiploma.yytdj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"`
 
-	ListenAddr string `short:"l" long:"listen" env:"LISTEN" description:"Listen Address (format: :8080|127.0.0.1:8080)" required:"false" default:":8080"`
+	ListenAddr string `short:"l" long:"listen" env:"LISTEN" description:"Listen Address (format: :8080|127.0.0.1:8080)" required:"false" default:":8787"`
 	BasePath   string `long:"base-path" env:"BASE_PATH" description:"base path of the host" required:"false" default:""`
-	FilesDir   string `long:"files-directory" env:"FILES_DIR" description:"Directory where all static files are located" required:"false" default:"./api"`
+	FilesDir   string `long:"files-directory" env:"FILES_DIR" description:"Directory where all static files are located" required:"false" default:"/home/jetbrainer/github.com/JetBrainer/sso/api"`
 	CertFile   string `short:"c" long:"cert" env:"CERT_FILE" description:"Location of the SSL/TLS cert file" required:"false" default:""`
 	KeyFile    string `short:"k" long:"key" env:"KEY_FILE" description:"Location of the SSL/TLS key file" required:"false" default:""`
 
 	GrpcListenAddr          string `long:"grpc-listen" env:"GRPC_LISTEN" description:"Grpc Listen Address (format: :4000|127.0.0.1:4000)" required:"false" default:":4000"`
 
-	JWTKey                string `long:"jwt-key" env:"JWT_KEY" description:"JWT secret key" required:"false" default:"technodom-secret"`
+	JWTKey                string `long:"jwt-key" env:"JWT_KEY" description:"JWT secret key" required:"false" default:"somatic-key"`
 	TokenTTLInMin         int64  `long:"token-ttl" env:"TOKEN_TTL" description:"Auth token lifetime duration (in min)" required:"false" default:"120"`
 	RefreshTokenTTLInDays int64  `long:"refresh-token-ttl" env:"REFRESH_TOKEN_TTL" description:"Refresh token lifetime duration (in days)" required:"false" default:"30"`
 
